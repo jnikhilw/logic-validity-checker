@@ -2,12 +2,12 @@ from dataclasses import dataclass, field
 from typing import Dict, Set, List, Tuple, Optional
 
 
-
     # --- AST NODES ---
     
 @dataclass(frozen=True)
 class F:
     pass
+
 
 # Variable  
 @dataclass(frozen=True)
@@ -19,14 +19,12 @@ class Var(F):
 @dataclass(frozen=True)
 class Not(F):
     a: F
-
-    
+ 
 # Conjunction operator 
 @dataclass(frozen=True)
 class And(F):
     a: F
     b: F
-
     
 # Disjunction operator 
 @dataclass(frozen=True)
@@ -267,7 +265,119 @@ def clone_branch(b: Branch) -> Branch:
     return nb
 
 
-        
+def expand_one(branch: Branch) -> Optional[List[Branch]]:
+    """
+    Expand one pending formula from the tableau worklist.
+
+    Returns:
+        None:
+            nothing left to expand
+
+        [branch]:
+            expansion happened without branching
+
+        [branch1, branch2]:
+            beta rule created alternatives
+    """
+    
+    if branch.closed:
+        return [branch]    
+
+    if not branch.todo:
+        return None
+
+    w, f = branch.todo.pop()
+    
+    if isinstance(f, And):
+        branch.add_formula(w, f.a)
+        branch.add_formula(w, f.b)
+        return [branch]
+    
+    if isinstance(f, Not) and isinstance(f.a, Not):
+        branch.add_formula(w, f.a.a)
+        return [branch]
+    
+    if isinstance(f, Iff):
+        branch.add_formula(w, Imp(f.a, f.b))
+        branch.add_formula(w, Imp(f.b, f.a))
+        return [branch]
+    
+    if isinstance(f, Not) and isinstance(f.a, Or):
+        branch.add_formula(w, Not(f.a.a))
+        branch.add_formula(w, Not(f.a.b))
+    
+        return [branch]
+    
+    if isinstance(f, Not) and isinstance(f.a, Imp):
+        branch.add_formula(w, f.a.a)
+        branch.add_formula(w, Not(f.a.b))
+    
+        return [branch]    
+    
+    if isinstance(f, Not) and isinstance(f.a, Iff):
+    
+        b1 = clone_branch(branch)
+        b2 = clone_branch(branch)
+    
+        b1.add_formula(w, f.a.a)
+        b1.add_formula(w, Not(f.a.b))
+    
+        b2.add_formula(w, Not(f.a.a))
+        b2.add_formula(w, f.a.b)
+    
+        return [b1,b2]
+    
+    if isinstance(f, Or):
+        b1 = clone_branch(branch)
+        b2 = clone_branch(branch)
+    
+        b1.add_formula(w, f.a)
+        b2.add_formula(w, f.b)
+    
+        return [b1, b2]
+    
+    if isinstance(f, Imp):
+        b1 = clone_branch(branch)
+        b2 = clone_branch(branch)
+    
+        b1.add_formula(w, Not(f.a))
+        b2.add_formula(w, f.b)
+    
+        return [b1, b2]
+    
+    if isinstance(f, Not) and isinstance(f.a, And):
+        b1 = clone_branch(branch)
+        b2 = clone_branch(branch)
+    
+        b1.add_formula(w, Not(f.a.a))
+        b2.add_formula(w, Not(f.a.b))
+    
+        return [b1, b2]    
+    
+    if isinstance(f, Dia):
+        v = branch.new_world()
+        add_R(branch, w, v)
+        branch.add_formula(v, f.a)
+        return [branch]
+    
+    if isinstance(f, Box):
+        for v in successors(branch, w):
+            branch.add_formula(v, f.a)
+        return [branch]    
+    
+    if isinstance(f, Not) and isinstance(f.a, Box):
+        branch.add_formula(w, Dia(Not(f.a.a)))
+        return [branch]
+    
+    
+    if isinstance(f, Not) and isinstance(f.a, Dia):
+        branch.add_formula(w, Box(Not(f.a.a)))
+        return [branch]
+    
+    
+    raise ValueError(f"Unhandled formula type: {f}")
+
+    
 def modal_validity(premises, conclusion, premise_tokens, conclusion_tokens):
     premise_asts = [parse(toks) for toks in premise_tokens]
     conclusion_ast = parse(conclusion_tokens)
