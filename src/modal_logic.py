@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Dict, Set, List, Tuple, Optional
+from logic_core import normalize, tokenize
 
 
     # --- AST NODES ---
@@ -8,12 +9,10 @@ from typing import Dict, Set, List, Tuple, Optional
 class F:
     pass
 
-
 # Variable  
 @dataclass(frozen=True)
 class Var(F):
     name: str
-
 
 # Negation operator 
 @dataclass(frozen=True)
@@ -56,6 +55,7 @@ class Dia(F):   # <>
 
 
     # --- PARSER (tokens -> AST) ---
+
 
 # precedence: bigger = binds tighter
 PREC = {
@@ -161,6 +161,7 @@ def parse(tokens: List[str]):
 
         # --- Helpers ---
 
+
 # F -> F
 # Returns ¬f or ¬(¬A) = A.
 def negate(f: F) -> F:
@@ -183,6 +184,7 @@ def is_literal_contradiction(existing: Set[F], f: F) -> bool:
 
 
         # --- TableauBranch ---
+       
         
 World = int
 
@@ -252,8 +254,14 @@ def successors(b: Branch, w: World) -> Set[World]:
 def add_R(b: Branch, w: World, v: World) -> None:
     ensure_world(b, w)
     ensure_world(b, v)
+
     b.R[w].add(v)
-    
+
+    # propagate existing Box obligations
+    for f in b.labels[w]:
+        if isinstance(f, Box):
+            b.add_formula(v, f.a)
+            
 def clone_branch(b: Branch) -> Branch:
     nb = Branch()
     nb.labels = {w: set(fs) for w, fs in b.labels.items()}
@@ -373,13 +381,92 @@ def expand_one(branch: Branch) -> Optional[List[Branch]]:
     if isinstance(f, Not) and isinstance(f.a, Dia):
         branch.add_formula(w, Box(Not(f.a.a)))
         return [branch]
-    
-    
-    raise ValueError(f"Unhandled formula type: {f}")
 
     
+    if is_literal(f):
+        return [branch]
+    
+    raise ValueError(f"Unhandled formula type: {f}")    
+    
+    
+
+
+def tableau_satisfiable(root: Branch) -> Tuple[bool, Optional[Branch]]:
+    """
+    Returns:
+        (True, branch)
+            if an open fully-expanded branch exists.
+
+        (False, None)
+            if every possible branch closes.
+    """
+
+    agenda: List[Branch] = [root]
+
+    while agenda:
+        branch = agenda.pop()
+
+        if branch.closed:
+            continue
+
+        if not branch.todo:
+            return True, branch
+
+        expanded = expand_one(branch)
+
+        if expanded is None:
+            return True, branch
+
+        for new_branch in expanded:
+            if not new_branch.closed:
+                agenda.append(new_branch)
+
+    return False, None
+
+def print_countermodel(branch):
+    print("\nCountermodel:")
+
+    for w, formulas in branch.labels.items():
+        print(f"\nWorld {w}:")
+        for f in formulas:
+            print(" ", f)
+
+    print("\nAccessibility:")
+    for w, successors in branch.R.items():
+        for v in successors:
+            print(f" {w} -> {v}")
+            
+            
 def modal_validity(premises, conclusion, premise_tokens, conclusion_tokens):
     premise_asts = [parse(toks) for toks in premise_tokens]
     conclusion_ast = parse(conclusion_tokens)
-    print("Premise ASTs:", premise_asts)
-    print("Conclusion AST:", conclusion_ast)
+
+    root = Branch()
+    w0 = root.new_world()
+
+    for premise in premise_asts:
+        root.add_formula(w0, premise)
+
+    root.add_formula(w0, Not(conclusion_ast))
+
+    sat, witness = tableau_satisfiable(root)
+
+    if sat:
+        print("INVALID in K")
+        print_countermodel(witness)
+        
+    else:
+        print("VALID in K")
+        
+def test_modal(premises, conclusion):
+    premise_tokens = [tokenize(normalize(p)) for p in premises]
+    conclusion_tokens = tokenize(normalize(conclusion))
+
+    modal_validity(
+        premises,
+        conclusion,
+        premise_tokens,
+        conclusion_tokens
+    )
+    
+
