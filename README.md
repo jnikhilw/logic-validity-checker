@@ -8,25 +8,25 @@ This project implements a logical evaluation pipeline for classical propositiona
 
 Key features
 
-- **Classical propositional logic argument evaluation: Determines whether the argument is valid, that is, whether the premises logically necessitate the conclusion. 
+- Classical propositional logic argument evaluation: Determines whether the argument is valid, that is, whether the premises logically necessitate the conclusion. 
 
-- **Truth table enumeration: Prints full truth tables with all possible truth assignments and valuations. 
+- Truth table enumeration: Prints full truth tables with all possible truth assignments and valuations. 
 
-- **Propositional Countermodel Generation: If an argument is invalid, it prints a valuation in which all the premises are true, but the conclusion is false. 
+- Propositional Countermodel Generation: If an argument is invalid, it prints a valuation in which all the premises are true, but the conclusion is false. 
 
-- **Logical Property Classification: Determines whether the premises are jointly satisfiable and whether the conclusion is logically necessary, contingent, or contradictory. 
+- Logical Property Classification: Determines whether the premises are jointly satisfiable and whether the conclusion is logically necessary, contingent, or contradictory. 
 
-- **Normal Modal Logic K Evaluation: Determines whether an argument is valid according to the Kripke semantics of normal modal logic K if a modal argument is detected. 
+- Normal Modal Logic K Evaluation: Determines whether an argument is valid according to the Kripke semantics of normal modal logic K if a modal argument is detected. 
 
-- **Abstract Syntax Tree Parsing: Converts tokenized formulas into recursively structured abstract syntax trees, representing all propositional connectives and modal operators, for modal logic evaluation. 
+- Abstract Syntax Tree Parsing: Converts tokenized formulas into recursively structured abstract syntax trees, representing all propositional connectives and modal operators, for modal logic evaluation. 
 
-- **Tableau-Based Satisfiability Search: Evaluates modal arguments by constructing a tableau from the premises and negated conclusion and performing depth-first search over alternative tableau branches, closing branches when contradictions are detected.
+- Tableau-Based Satisfiability Search: Evaluates modal arguments by constructing a tableau from the premises and negated conclusion and performing depth-first search over alternative tableau branches, closing branches when contradictions are detected.
 
-- **Dynamic Kripke Model Construction: Constructs possible worlds, accessibility relations, and world-specific formula constraints during tableau expansion rather than enumerating complete modal models in advance.
+- Dynamic Kripke Model Construction: Constructs possible worlds, accessibility relations, and world-specific formula constraints during tableau expansion rather than enumerating complete modal models in advance.
 
-- **Modal Countermodel Generation: When an open tableau branch is found, extracts and displays the resulting Kripke countermodel demonstrating how the premises can be satisfied while the conclusion is false.
+- Modal Countermodel Generation: When an open tableau branch is found, extracts and displays the resulting Kripke countermodel demonstrating how the premises can be satisfied while the conclusion is false.
 
-- **Symbolic Formula Normalization and Tokenization: Accepts multiple symbolic representations of logical operators and converts them into a standardized token sequence for parsing and evaluation.
+- Symbolic Formula Normalization and Tokenization: Accepts multiple symbolic representations of logical operators and converts them into a standardized token sequence for parsing and evaluation.
 
 
 ## Theoretical Background
@@ -152,11 +152,106 @@ Modal Operator Detection
 
 ## Repository Structure
 
+```text
+valcheck/
+│
+├── src/
+│   ├── logic_core.py      # Shared normalization and tokenization utilities
+│   ├── main.py            # Main application entry point and logic-engine routing
+│   ├── modal_logic.py     # Modal logic K parser, tableau search, and Kripke countermodels
+│   ├── prop_logic.py      # Propositional logic evaluation and truth-table reasoning
+│   └── utils.py           # Shared helper utilities
+│
+├── tests/                 # Automated tests for propositional and modal logic
+│
+├── .gitignore             # Files and directories excluded from Git tracking
+└── README.md              # Project documentation
+```
+
 ## Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/jnikhilw/logic-validity-checker.git
+cd logic-validity-checker
+```
+
+Run the program:
+
+```bash
+python3 src/main.py
+```
 
 ## Usage
 
+## Usage
+
+Run the program:
+
+```bash
+python3 src/main.py
+```
+
+Enter premises separated by commas:
+
+```text
+P -> Q, P
+```
+
+Enter the conclusion:
+
+```text
+Q
+```
+
+Supported propositional operators:
+
+```text
+~    negation
+&    conjunction
+|    disjunction
+->   implication
+<->  biconditional
+```
+
+Supported modal operators:
+
+```text
+[]   necessity
+<>   possibility
+```
+
+Example modal input:
+
+```text
+Premises:
+[](P -> Q), []P
+
+Conclusion:
+[]Q
+```
+
+The program returns the validity result and, when applicable, a counterexample or Kripke countermodel.
+
+
 ## Propositional Logic Engine
+
+### Infix-to-Postfix Conversion
+
+The propositional logic engine converts the premises and conclusion from infix notation to postfix notation using the shunting-yard algorithm. A previously defined dictionary specifies the binding strength, or precedence, of each classical logical operator. 
+
+The shunting-yard algorithm keeps track of two lists: the RPN output stack and the operator stack. For each token, if the token is an atomic variable, it adds it to the output stack; if it is a logical connective, 
+
+### Variable Extraction and Valuation Generation
+
+### RPN Evaluation
+
+### Validity Checking
+
+### Satisfiability and Conclusion Classification
+
+### Countermodel Generation
 
 ## Modal Logic Engine
 
