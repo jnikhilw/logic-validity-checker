@@ -33,6 +33,123 @@ Key features
 
 ## System Architecture
 
+The user is first prompted to input the premises for an argument, separated by commas, and is then prompted to input the conclusion of the argument. The premises and conclusion are then normalized, converting common propositional or modal symbols into a standardized set of logical connective symbols. The normalized premises and conclusion are then tokenized into lists whose elements are atomic propositions, logical connectives, or modal operators.
+
+If modal operators are detected, the premises and conclusion are then routed to the modal logic engine; otherwise, they are routed to the propositional logic engine. If the premises and conclusion are routed to the propositional logic engine, the user is prompted to choose whether to print a full truth table. The token list for each is then converted from infix notation to postfix notation. The atomic variables are placed into a sorted set, and a valuation list is constructed whose elements are dictionaries representing truth-value assignments to the atomic variables. State-tracking variables are then declared for later semantic analysis. For each valuation, the RPN lists of the premises and conclusion are evaluated, and the state-tracking variables are updated. Then, from the state-tracking variables, the argument's logical properties are determined: if the conclusion is true under some valuations and false under others, the conclusion is contingent; if it is true under all valuations, it is a tautology; if it is false under all valuations, it is a contradiction. If there is a valuation under which the premises jointly evaluate to true, then the premises are satisfiable. If there exists a valuation under which the premises are true and the conclusion is false, the argument is invalid; otherwise, it is valid. If the argument is invalid, the counterexample valuation is stored and printed to the user, along with the conclusion and satisfiability classifications. The full truth table is also printed if requested by the user.
+
+If the argument is routed to the modal logic engine, the premises and conclusion are parsed, where the tokens are converted into formula objects and then hierarchically structured into abstract syntax trees. A tableau branch is then constructed with world 0. The premises and negated conclusion are then added to world 0. Each world stores the formulas asserted at that world. New worlds are then generated as needed when modal formulas are expanded. If \(P\) and \(\neg P\) are detected at the same world, the branch is closed. The tableau branches are then searched depth-first. If a branch is fully expanded and remains open, the argument is deemed invalid; otherwise, it is valid. If the argument is invalid, a countermodel is then printed to the user.
+
+
+### Pipeline Overview
+
+
+```text
+User Input
+│
+├── Premises
+└── Conclusion
+        │
+        ▼
+Normalization
+        │
+        ▼
+Tokenization
+        │
+        ▼
+Modal Operator Detection
+        │
+        ├── No Modal Operators
+        │       │
+        │       ▼
+        │   Propositional Logic Engine
+        │       │
+        │       ├── Prompt for Optional Truth Table
+        │       │
+        │       ▼
+        │   Infix → Postfix (RPN) Conversion
+        │       │
+        │       ▼
+        │   Extract Atomic Variables
+        │       │
+        │       ▼
+        │   Generate Truth-Value Valuations
+        │       │
+        │       ▼
+        │   Evaluate Premises and Conclusion
+        │   Under Each Valuation
+        │       │
+        │       ▼
+        │   Update Semantic State
+        │       │
+        │       ├── Premise Satisfiability
+        │       ├── Conclusion Classification
+        │       │   ├── Tautology
+        │       │   ├── Contradiction
+        │       │   └── Contingency
+        │       │
+        │       └── Argument Validity
+        │               │
+        │               ├── Valid
+        │               │
+        │               └── Invalid
+        │                       │
+        │                       ▼
+        │                 Counterexample Valuation
+        │
+        └── Modal Operators Detected
+                │
+                ▼
+            Modal Logic K Engine
+                │
+                ▼
+            Parse Tokens
+                │
+                ▼
+        Abstract Syntax Trees
+                │
+                ▼
+        Construct Initial Tableau Branch
+                │
+                ▼
+            Create World 0
+                │
+                ▼
+    Add Premises + Negated Conclusion
+                │
+                ▼
+        Expand Tableau Formulas
+                │
+                ├── Propositional Expansion
+                │       │
+                │       └── May Create New Tableau Branches
+                │
+                └── Modal Expansion
+                        │
+                        ├── Create New Worlds
+                        └── Add Accessibility Relations
+                │
+                ▼
+        Depth-First Tableau Search
+                │
+                ├── Contradiction at a World
+                │       │
+                │       └── Close Branch
+                │
+                └── Fully Expanded Open Branch
+                        │
+                        ▼
+                    INVALID
+                        │
+                        ▼
+                Kripke Countermodel
+
+        If Every Tableau Branch Closes
+                        │
+                        ▼
+                      VALID
+```
+
+
 ## Repository Structure
 
 ## Installation
