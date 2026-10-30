@@ -31,6 +31,75 @@ Key features
 
 ## Theoretical Background
 
+### Classical Propositional Logic
+
+Classical propositional logic evaluates formulas composed of atomic propositions and logical operators such as negation, conjunction, disjunction, implication, and biconditional. A valuation assigns each atomic proposition a truth value, and the truth value of a compound proposition is determined from the truth values of its components. An argument is valid if there is no valuation in which all of the premises are true and the conclusion is false.
+
+### Modal Logic K
+
+Modern modal logic is a family of extensions of classical logic developed in the 20th century that can express and analyze the notions of possibility and necessity. While modal logic is a wide family of logics, this project focuses on Kripke semantics for normal modal logic K.
+
+Semantically, we can interpret modality in K with reference to possible worlds. A possible world is a world where a particular state of affairs obtains. To say that \(X\) is possible is thus to say that \(X\) is true in some accessible possible world. However, possibility is relative to the world from which it is evaluated. Thus, whichever world we choose to evaluate possibility from must access a world in which \(X\) is true for \(X\) to be deemed possible at that world.
+
+To say that \(X\) is necessary is to say that \(X\) is true in every possible world accessible from the world at which it is being evaluated. Note that \(X\) can be vacuously necessary if no accessible possible world exists.
+
+All truth conditions for the logical operators in classical propositional logic carry over. However, in K there are two additional operators. The diamond expresses possibility, \(\Diamond\), whereas the box expresses necessity, \(\Box\). Furthermore,
+
+\[
+\neg\Diamond P \equiv \Box\neg P
+\]
+
+since to say that \(P\) is not possible is to say that \(P\) is false in every accessible possible world, and
+
+\[
+\neg\Box P \equiv \Diamond\neg P
+\]
+
+since to say that \(P\) is not necessary is to say that it is possible that \(P\) is false.
+
+### Kripke Semantics
+
+A model in K can be represented as
+
+\[
+M=(W,R,V),
+\]
+
+where \(W\) is the set of possible worlds, \(R\) is a relation conveying accessibility between two worlds in \(W\), and \(V\) is a valuation function assigning atomic propositions truth values at each possible world in \(W\).
+
+For example,
+
+\[
+wRw'
+\]
+
+conveys that world \(w\) accesses world \(w'\).
+
+The truth conditions for each modal operator follow from these semantics. \(\Diamond P\) is true at \(w \in W\) if and only if there exists a world \(w'\) such that \(wRw'\) and \(P\) is true at \(w'\).
+
+Likewise, \(\Box P\) is true at \(w \in W\) if and only if, for every world \(w'\) such that \(wRw'\), \(P\) is true at \(w'\).
+
+K places no additional restrictions on the accessibility relation \(R\). In particular, \(R\) is not required to be reflexive, symmetric, transitive, or serial.
+
+### Tableau Reasoning
+
+Now that we have a basic grasp of K, we can apply its semantics to tableaux. In a tableau for K, each formula is associated with a particular world, so \(P\) at world 0 means that \(P\) is true at world 0. The branching and decomposition rules for the classical operators carry over from classical tableaux.
+
+If \(\Diamond P\) occurs at a world \(w\), then there must exist some accessible world \(w'\) such that \(wRw'\) and \(P\) is true at \(w'\). The tableau can therefore generate a new accessible world and assert \(P\) at that world.
+
+If \(\Box P\) occurs at a world \(w\), then \(P\) must be true at every world accessible from \(w\). Therefore, whenever \(wRw'\), \(P\) must also be asserted at \(w'\).
+
+To determine whether an argument is valid, the premises are placed on the tableau together with the negation of the conclusion. If \(P\) and \(\neg P\) are derived at the same world, that branch closes.
+
+If every branch closes, there is no model in which the premises are true and the conclusion is false, and the argument is therefore valid. If a fully expanded branch remains open, then there is a model in which the premises are true and the conclusion is false, so the argument is invalid.
+
+### Countermodels
+
+If a tableau remains open, a countermodel can be constructed from that branch. A countermodel \((W,R,V)\) first specifies all worlds that are elements of \(W\), then specifies the accessibility relation \(R\), and finally specifies the valuation function \(V\) for the atomic propositions at the relevant worlds.
+
+The resulting Kripke model demonstrates a case in which the premises of the original argument are true while its conclusion is false.
+
+
 ## System Architecture
 
 The user is first prompted to input the premises for an argument, separated by commas, and is then prompted to input the conclusion of the argument. The premises and conclusion are then normalized, converting common propositional or modal symbols into a standardized set of logical connective symbols. The normalized premises and conclusion are then tokenized into lists whose elements are atomic propositions, logical connectives, or modal operators.
@@ -185,8 +254,6 @@ python3 src/main.py
 
 ## Usage
 
-## Usage
-
 Run the program:
 
 ```bash
@@ -239,9 +306,10 @@ The program returns the validity result and, when applicable, a counterexample o
 
 ### Infix-to-Postfix Conversion
 
-The propositional logic engine converts the premises and conclusion from infix notation to postfix notation using the shunting-yard algorithm. A previously defined dictionary specifies the binding strength, or precedence, of each classical logical operator. 
+The propositional logic engine converts the premises and conclusion from infix notation to postfix notation using the shunting-yard algorithm. A previously defined dictionary specifies the binding strength, or precedence, of each classical logical operator.
 
-The shunting-yard algorithm keeps track of two lists: the RPN output stack and the operator stack. For each token, if the token is an atomic variable, it adds it to the output stack; if it is a logical connective, 
+The shunting-yard algorithm keeps track of two lists: the RPN output list and the operator stack. For each token, if the token is an atomic variable, it is added to the output list; if it is a logical connective, the algorithm checks the operator at the top of the operator stack. If the connective is left-associative, operators are moved from the operator stack to the output list while the precedence of the top operator is greater than or equal to the precedence of the current token. If the connective is right-associative, operators are moved to the output list only while the precedence of the top operator is greater than the precedence of the current token. The current connective is then added to the operator stack. For a right parenthesis, the operator stack is popped into the output list until a left parenthesis is encountered. Any remaining operators are then moved from the operator stack to the output list.
+
 
 ### Variable Extraction and Valuation Generation
 
@@ -257,6 +325,55 @@ The shunting-yard algorithm keeps track of two lists: the RPN output stack and t
 
 ## Testing
 
+Tests are organized in the `tests/` directory and cover propositional evaluation, modal logic K, parsing, and countermodel generation.
+
+### Propositional Logic
+
+```text
+P -> Q, P ⊨ Q
+Expected: Valid
+
+P -> Q, Q ⊨ P
+Expected: Invalid
+
+P, ~P ⊨ Q
+Expected: Valid
+```
+
+### Modal Logic K
+
+```text
+[](P -> Q), []P ⊨ []Q
+Expected: Valid
+
+[]P ⊨ P
+Expected: Invalid
+
+[]P ⊨ [][]P
+Expected: Invalid
+
+<>(P & Q) ⊨ <>P
+Expected: Valid
+```
+
+### Run Tests
+
+```bash
+pytest
+```
+
 ## Limitations and Future Work
 
 ## References
+
+H. B. Enderton, *A Mathematical Introduction to Logic*, 2nd ed. Academic Press, 2001.
+
+P. Blackburn, M. de Rijke, and Y. Venema, *Modal Logic*. Cambridge University Press, 2001.
+
+G. E. Hughes and M. J. Cresswell, *A New Introduction to Modal Logic*. Routledge, 1996.
+
+M. Fitting, *Proof Methods for Modal and Intuitionistic Logics*. Springer, 1983.
+
+R. M. Smullyan, *First-Order Logic*. Springer, 1968.
+
+E. W. Dijkstra, “Algol 60 Translation,” Mathematisch Centrum, Amsterdam, MR 35, 1961.
