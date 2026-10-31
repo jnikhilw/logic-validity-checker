@@ -39,63 +39,55 @@ Classical propositional logic evaluates formulas composed of atomic propositions
 
 Modern modal logic is a family of extensions of classical logic developed in the 20th century that can express and analyze the notions of possibility and necessity. While modal logic is a wide family of logics, this project focuses on Kripke semantics for normal modal logic K.
 
-Semantically, we can interpret modality in K with reference to possible worlds. A possible world is a world where a particular state of affairs obtains. To say that \(X\) is possible is thus to say that \(X\) is true in some accessible possible world. However, possibility is relative to the world from which it is evaluated. Thus, whichever world we choose to evaluate possibility from must access a world in which \(X\) is true for \(X\) to be deemed possible at that world.
+Semantically, we can interpret modality in K with reference to possible worlds. A possible world is a world where a particular state of affairs obtains. To say that X is possible is thus to say that X is true in some accessible possible world. However, possibility is relative to the world from which it is evaluated. Thus, whichever world we choose to evaluate possibility from must access a world in which X is true for X to be deemed possible at that world.
 
-To say that \(X\) is necessary is to say that \(X\) is true in every possible world accessible from the world at which it is being evaluated. Note that \(X\) can be vacuously necessary if no accessible possible world exists.
+To say that X is necessary is to say that X is true in every possible world accessible from the world at which it is being evaluated. Note that X can be vacuously necessary if no accessible possible world exists.
 
-All truth conditions for the logical operators in classical propositional logic carry over. However, in K there are two additional operators. The diamond expresses possibility, \(\Diamond\), whereas the box expresses necessity, \(\Box\). Furthermore,
+All truth conditions for the logical operators in classical propositional logic carry over. However, in K there are two additional operators. The diamond expresses possibility, ◇, whereas the box expresses necessity, □. Furthermore,
 
-\[
-\neg\Diamond P \equiv \Box\neg P
-\]
+¬◇P ≡ □¬P
 
-since to say that \(P\) is not possible is to say that \(P\) is false in every accessible possible world, and
+since to say that P is not possible is to say that P is false in every accessible possible world, and
 
-\[
-\neg\Box P \equiv \Diamond\neg P
-\]
+¬□P ≡ ◇¬P
 
-since to say that \(P\) is not necessary is to say that it is possible that \(P\) is false.
+since to say that P is not necessary is to say that it is possible that P is false.
 
 ### Kripke Semantics
 
 A model in K can be represented as
 
-\[
-M=(W,R,V),
-\]
+M = (W, R, V),
 
-where \(W\) is the set of possible worlds, \(R\) is a relation conveying accessibility between two worlds in \(W\), and \(V\) is a valuation function assigning atomic propositions truth values at each possible world in \(W\).
+where W is the set of possible worlds, R is a relation conveying accessibility between two worlds in W, and V is a valuation function assigning atomic propositions truth values at each possible world in W.
 
 For example,
 
-\[
-wRw'
-\]
+wRw′
 
-conveys that world \(w\) accesses world \(w'\).
+conveys that world w accesses world w′.
 
-The truth conditions for each modal operator follow from these semantics. \(\Diamond P\) is true at \(w \in W\) if and only if there exists a world \(w'\) such that \(wRw'\) and \(P\) is true at \(w'\).
+The truth conditions for each modal operator follow from these semantics. ◇P is true at w ∈ W if and only if there exists a world w′ such that wRw′ and P is true at w′.
 
-Likewise, \(\Box P\) is true at \(w \in W\) if and only if, for every world \(w'\) such that \(wRw'\), \(P\) is true at \(w'\).
+Likewise, □P is true at w ∈ W if and only if, for every world w′ such that wRw′, P is true at w′.
 
-K places no additional restrictions on the accessibility relation \(R\). In particular, \(R\) is not required to be reflexive, symmetric, transitive, or serial.
+K places no additional restrictions on the accessibility relation R. In particular, R is not required to be reflexive, symmetric, transitive, or serial.
 
 ### Tableau Reasoning
 
-Now that we have a basic grasp of K, we can apply its semantics to tableaux. In a tableau for K, each formula is associated with a particular world, so \(P\) at world 0 means that \(P\) is true at world 0. The branching and decomposition rules for the classical operators carry over from classical tableaux.
+Now that we have a basic grasp of K, we can apply its semantics to tableaux. In a tableau for K, each formula is associated with a particular world, so P at world 0 means that P is true at world 0. The branching and decomposition rules for the classical operators carry over from classical tableaux.
 
-If \(\Diamond P\) occurs at a world \(w\), then there must exist some accessible world \(w'\) such that \(wRw'\) and \(P\) is true at \(w'\). The tableau can therefore generate a new accessible world and assert \(P\) at that world.
+If ◇P occurs at a world w, then there must exist some accessible world w′ such that wRw′ and P is true at w′. The tableau can therefore generate a new accessible world and assert P at that world.
 
-If \(\Box P\) occurs at a world \(w\), then \(P\) must be true at every world accessible from \(w\). Therefore, whenever \(wRw'\), \(P\) must also be asserted at \(w'\).
+If □P occurs at a world w, then P must be true at every world accessible from w. Therefore, whenever wRw′, P must also be asserted at w′.
 
-To determine whether an argument is valid, the premises are placed on the tableau together with the negation of the conclusion. If \(P\) and \(\neg P\) are derived at the same world, that branch closes.
+To determine whether an argument is valid, the premises are placed on the tableau together with the negation of the conclusion. If P and ¬P are derived at the same world, that branch closes.
 
 If every branch closes, there is no model in which the premises are true and the conclusion is false, and the argument is therefore valid. If a fully expanded branch remains open, then there is a model in which the premises are true and the conclusion is false, so the argument is invalid.
 
 ### Countermodels
 
-If a tableau remains open, a countermodel can be constructed from that branch. A countermodel \((W,R,V)\) first specifies all worlds that are elements of \(W\), then specifies the accessibility relation \(R\), and finally specifies the valuation function \(V\) for the atomic propositions at the relevant worlds.
+If a tableau remains open, a countermodel can be constructed from that branch. A countermodel (W, R, V) first specifies all worlds that are elements of W, then specifies the accessibility relation R, and finally specifies the valuation function V for the atomic propositions at the relevant worlds.
 
 The resulting Kripke model demonstrates a case in which the premises of the original argument are true while its conclusion is false.
 
@@ -263,7 +255,7 @@ python3 src/main.py
 Enter premises separated by commas:
 
 ```text
-P -> Q, P
+P → Q, P
 ```
 
 Enter the conclusion:
@@ -275,28 +267,28 @@ Q
 Supported propositional operators:
 
 ```text
-~    negation
-&    conjunction
-|    disjunction
-->   implication
-<->  biconditional
+¬    negation
+∧    conjunction
+∨    disjunction
+→    implication
+↔    biconditional
 ```
 
 Supported modal operators:
 
 ```text
-[]   necessity
-<>   possibility
+□    necessity
+◇    possibility
 ```
 
 Example modal input:
 
 ```text
 Premises:
-[](P -> Q), []P
+□(P → Q), □P
 
 Conclusion:
-[]Q
+□Q
 ```
 
 The program returns the validity result and, when applicable, a counterexample or Kripke countermodel.
@@ -313,46 +305,154 @@ The shunting-yard algorithm keeps track of two lists: the RPN output list and th
 
 ### Variable Extraction and Valuation Generation
 
+For each token in the premises and conclusion lists, if the token is an uppercase letter, it is added to a variable set. For each integer from (0) to (2^n - 1), a corresponding (n)-bit binary string is constructed. For each variable and corresponding bit, 0 and 1 are converted to False and True, respectively, using an equality check, and added to a valuation dictionary where each key is a variable, and each value is the Boolean evaluation of that variable under the valuation. The valuation is then appended to the rows list once complete, and this process is repeated for all possible valuations.
+
 ### RPN Evaluation
 
-### Validity Checking
+The RPN expression is evaluated using a stack. For each token in the RPN expression, if it is an atomic proposition, its truth value is retrieved from the current valuation dictionary and added to the stack. If it is a unary operator, the stack is popped once; if it is a binary operator, the stack is popped twice. The popped truth values are then evaluated using the corresponding Python Boolean operations, and the result is pushed back onto the stack. Once all tokens have been processed, the remaining element of the stack is returned, denoting the truth value of the entire premise or conclusion under that valuation. This evaluation is repeated for each premise and the conclusion under every generated valuation.
 
-### Satisfiability and Conclusion Classification
+
+### Semantic State Tracking
+
+State-tracking variables for satisfiability, whether the conclusion was ever true, whether it was ever false, and whether a counterexample exists are initialized to False. The valuations are then iterated over, with each valuation added as a row of the truth table. If there is a valuation under which the premises are jointly true, satisfiability is set to True. If the conclusion evaluates to true or false under a valuation, the corresponding accumulator variable is updated. If, by the end of the loop, both conditions are true, the conclusion is contingent; if the conclusion was true under at least one valuation and never false, it is a tautology; otherwise, it is a contradiction. If there is a valuation under which the premises are true and the conclusion is false, the counterexample variable is set to True, and the valuation, premise results, and conclusion result are stored.
+
+## Modal Logic Engine
+
+### Parsing and AST Construction 
+
+Variables, logical connectives, and modal operators are defined as classes. After tokenization of the premises and conclusion, each token list is passed to a parser, which recursively generates an abstract syntax tree according to precedence and associativity rules using the defined classes.
+
+### Tableau Branch and Kripke Model Representation
+
+A branch is a tableau candidate state defined as a class. A branch has a `labels` dictionary whose keys are worlds and whose values are sets whose elements are formulas asserted true at their respective worlds, and an accessibility relation `R`, represented using a dictionary whose keys are worlds and whose values are sets of worlds accessible from that world. The branch also has a `todo` list of tuples containing worlds and formulas that require further expansion. When a branching rule is applied, the current branch is cloned into separate branch objects, and the corresponding newly expanded formulas are added to each clone. If a contradiction occurs at a world on a branch, the branch is closed.
+
+### Tableau Expansion Rules
+
+#### Non-Branching Rules
+
+**Conjunction**
+
+P ∧ Q
+
+adds both P and Q to the same branch.
+
+**Double Negation**
+
+¬¬P
+
+adds P to the same branch.
+
+**Negated Disjunction**
+
+¬(P ∨ Q)
+
+adds ¬P and ¬Q to the same branch.
+
+**Negated Implication**
+
+¬(P → Q)
+
+adds P and ¬Q to the same branch.
+
+#### Branching Rules
+
+**Disjunction**
+
+P ∨ Q
+
+creates two branches: one containing P and one containing Q.
+
+**Implication**
+
+P → Q
+
+creates two branches: one containing ¬P and one containing Q.
+
+**Negated Conjunction**
+
+¬(P ∧ Q)
+
+creates two branches: one containing ¬P and one containing ¬Q.
+
+**Biconditional**
+
+P ↔ Q
+
+creates two branches: one containing P and Q, and one containing ¬P and ¬Q.
+
+**Negated Biconditional**
+
+¬(P ↔ Q)
+
+creates two branches: one containing P and ¬Q, and one containing ¬P and Q.
+
+#### Modal Rules
+
+**Possibility**
+
+◇P
+
+creates a new accessible world and adds P to that world.
+
+**Necessity**
+
+□P
+
+adds P to every world accessible from the current world.
+
+**Negated Necessity**
+
+¬□P
+
+is transformed into:
+
+◇¬P
+
+**Negated Possibility**
+
+¬◇P
+
+is transformed into:
+
+□¬P
+
+### Depth-First Search and Validity Checking
+
+A root branch is constructed and initialized with the premises, and the negation of the conclusion asserted at world 0. The root branch is added to an `agenda` list to keep track of tableau states that have not yet been searched. A depth-first search is then performed over the tableau branches, recursively exploring all branches generated by branching rules. If a branch is fully expanded and remains open, the argument is invalid, since there exists a model in which the premises are true and the conclusion is false. If the search completes and every branch is closed, the argument is valid.
 
 ### Countermodel Generation
 
-## Modal Logic Engine
+If the tableau search finds a fully expanded open branch, that branch is stored as a countermodel. The countermodel contains the accessibility relation R, which specifies the accessibility relations between worlds, and the labels dictionary, which records the formulas asserted true at each world.
 
 ## Testing
 
 Tests are organized in the `tests/` directory and cover propositional evaluation, modal logic K, parsing, and countermodel generation.
-
 ### Propositional Logic
 
 ```text
-P -> Q, P ⊨ Q
+P → Q, P ⊨ Q
 Expected: Valid
 
-P -> Q, Q ⊨ P
+P → Q, Q ⊨ P
 Expected: Invalid
 
-P, ~P ⊨ Q
+P, ¬P ⊨ Q
 Expected: Valid
 ```
 
 ### Modal Logic K
 
 ```text
-[](P -> Q), []P ⊨ []Q
+□(P → Q), □P ⊨ □Q
 Expected: Valid
 
-[]P ⊨ P
+□P ⊨ P
 Expected: Invalid
 
-[]P ⊨ [][]P
+□P ⊨ □□P
 Expected: Invalid
 
-<>(P & Q) ⊨ <>P
+◇(P ∧ Q) ⊨ ◇P
 Expected: Valid
 ```
 
@@ -363,6 +463,18 @@ pytest
 ```
 
 ## Limitations and Future Work
+
+## Limitations
+
+1. Since the propositional logic engine uses exhaustive truth-table enumeration, the number of valuations grows as 2ⁿ, where n is the number of atomic propositions. As a result, expressions with large n become computationally expensive to evaluate.
+
+2. The modal logic engine can only evaluate expressions in normal modal logic K and cannot currently support extensions that impose additional properties on the accessibility relation, such as reflexivity, symmetry, or transitivity between worlds.
+
+## Future Work
+
+1. Create a router for the propositional logic engine that, when the computational cost of exhaustive truth-table evaluation passes a specified threshold, routes the argument to a tableau-based propositional evaluation method rather than explicitly enumerating all 2ⁿ valuations.
+
+2. Extend the modal logic engine to support additional modal systems, including T, B, K4, S4, and S5.
 
 ## References
 
